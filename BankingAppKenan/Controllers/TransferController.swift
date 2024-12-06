@@ -1,31 +1,13 @@
-//
-//  TransferController.swift
-//  BankingAppKenan
-//
-//  Created by Kenan on 21.11.24.
-//
-
 import UIKit
 
 class TransferController: UIViewController {
-    
-    private var cards: [HomeViewModel.CardModel] = []
-    private var selectedFromCard: HomeViewModel.CardModel?
-    private var selectedToCard: HomeViewModel.CardModel?
-    
-    lazy var pickerView: UIPickerView = {
-        let picker = UIPickerView()
-        picker.delegate = self
-        picker.dataSource = self
-        return picker
-    }()
+    private let viewModel = TransferViewModel()
     
     lazy var selectFrom: UITextField = {
         let textField = UITextField()
         textField.placeholder = "Select from"
         textField.borderStyle = .roundedRect
-        textField.inputView = pickerView
-        textField.tag = 0
+        textField.addTarget(self, action: #selector(presentFromCardSheet), for: .editingDidBegin)
         return textField
     }()
     
@@ -33,8 +15,7 @@ class TransferController: UIViewController {
         let textField = UITextField()
         textField.placeholder = "Select to"
         textField.borderStyle = .roundedRect
-        textField.inputView = pickerView
-        textField.tag = 1
+        textField.addTarget(self, action: #selector(presentToCardSheet), for: .editingDidBegin)
         return textField
     }()
     
@@ -50,37 +31,70 @@ class TransferController: UIViewController {
         let button = UIButton()
         button.setTitle("Transfer", for: .normal)
         button.backgroundColor = .blue
+        button.layer.cornerRadius = 8
         button.addTarget(self, action: #selector(transfer), for: .touchUpInside)
         return button
     }()
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        setupConstrain()
+        view.backgroundColor = .white
+        setupConstraints()
     }
     
-    func configure(with cards: [HomeViewModel.CardModel]) {
-        self.cards = cards
+    @objc private func presentFromCardSheet() {
+        presentCardSheet(title: "Select From Card") { [weak self] selectedCard in
+            self?.viewModel.selectedFromCard = selectedCard
+            self?.selectFrom.text = selectedCard.cardNumber
+        }
     }
     
-    @objc func transfer() {
-        guard let fromCard = selectedFromCard, let toCard = selectedToCard, let amountText = amount.text, let transferAmount = Double(amountText) else {
-            showAlert(message: "Please fill in all fields correctly.")
+    @objc private func presentToCardSheet() {
+        presentCardSheet(title: "Select To Card") { [weak self] selectedCard in
+            self?.viewModel.selectedToCard = selectedCard
+            self?.selectTo.text = selectedCard.cardNumber
+        }
+    }
+    
+    private func presentCardSheet(title: String, completion: @escaping (CardModel) -> Void) {
+        if viewModel.cards.isEmpty {
+            let alert = UIAlertController(title: "No Cards Found", message: "Please add cards to your account before transferring.", preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "OK", style: .default))
+            present(alert, animated: true)
             return
         }
         
-        if fromCard.cartBalance >= transferAmount {
-            fromCard.cartBalance -= transferAmount
-            toCard.cartBalance += transferAmount
-            navigationController?.popViewController(animated: true)
-            showAlert(title: "Succes", message: "Transfer is successful.")
-
+        let sheetController = CardSelectionSheetController(cards: viewModel.cards, title: title)
+        sheetController.onCardSelected = completion
+        
+        if let sheetPresentation = sheetController.sheetPresentationController {
+            sheetPresentation.detents = [.medium(), .large()]
+            sheetPresentation.prefersGrabberVisible = true
+        }
+        
+        present(sheetController, animated: true)
+    }
+    
+    @objc private func transfer() {
+        let validation = viewModel.validateTransfer(amountText: amount.text)
+        
+        guard validation.isValid else {
+            showAlert(title: "Error", message: validation.errorMessage ?? "Unknown error")
+            return
+        }
+        
+        if viewModel.performTransfer(amountText: amount.text) {
+            let alert = UIAlertController(title: "Success", message: "Transfer Completed", preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { [weak self] _ in
+                self?.navigationController?.popViewController(animated: true)
+            }))
+            present(alert, animated: true)
         } else {
-            showAlert(message: "Insufficient funds.")
+            showAlert(title: "Error", message: "Transfer failed. Please try again.")
         }
     }
     
-    private func setupConstrain() {
+    private func setupConstraints() {
         view.addSubview(selectFrom)
         view.addSubview(selectTo)
         view.addSubview(amount)
@@ -110,33 +124,9 @@ class TransferController: UIViewController {
             transferButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -48),
             transferButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
             transferButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
-            transferButton.heightAnchor.constraint(equalToConstant: 48),
+            transferButton.heightAnchor.constraint(equalToConstant: 48)
         ])
     }
 }
 
-extension TransferController: UIPickerViewDelegate, UIPickerViewDataSource {
-    func numberOfComponents(in pickerView: UIPickerView) -> Int {
-        return 1
-    }
-    
-    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
-        return cards.count
-    }
-    
-    func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
-        let card = cards[row]
-        return card.cardNumberFormatted
-    }
-    
-    func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
-        let selectedCard = cards[row]
-        if selectFrom.isFirstResponder {
-            selectedFromCard = selectedCard
-            selectFrom.text = selectedCard.cardNumberFormatted
-        } else if selectTo.isFirstResponder {
-            selectedToCard = selectedCard
-            selectTo.text = selectedCard.cardNumberFormatted
-        }
-    }
-}
+

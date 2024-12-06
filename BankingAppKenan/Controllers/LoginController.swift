@@ -1,25 +1,21 @@
 import UIKit
-import RealmSwift
+
 
 class LoginController: UIViewController {
     
-    lazy var loginButton: ReusableButton = {
-        ReusableButton(title: "Login", color: .blue, onaction: {[weak self] in self?.loginTapped()})
-    }()
-     
-    let scrollView: UIScrollView = {
-        let scrollView = UIScrollView()
-        scrollView.backgroundColor = .white
-        scrollView.translatesAutoresizingMaskIntoConstraints = false
-        return scrollView
-    }()
+    var viewmodel: LoginViewModel
     
-    let signupLabel: UILabel = {
-        let label = UILabel()
-        label.text = "Don't have an account? Sign up"
-        label.textColor = .blue
-        label.isUserInteractionEnabled = true
-        return label
+    required init(viewmodel: LoginViewModel) {
+        self.viewmodel = viewmodel
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    lazy var loginButton: ReusableButton = {
+        ReusableButton(title: "Login", color: .blue, onaction: { [weak self] in self?.loginTapped() })
     }()
     
     let nametextField: UITextField = {
@@ -36,116 +32,71 @@ class LoginController: UIViewController {
         return textField
     }()
     
-    let stackView: UIStackView = {
-        let stackView = UIStackView()
-        stackView.axis = .vertical
-        stackView.distribution = .fill
-        stackView.spacing = 12
-        return stackView
-    }()
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
-        setupFields()
         setupLoginUI()
-        setupGesture()
-    }
-    
-    private func setupFields() {
-        paswordtextField.delegate = self
-        nametextField.delegate = self
+        bindViewModel()
     }
     
     private func setupLoginUI() {
-        view.addSubview(scrollView)
-        scrollView.addSubview(stackView)
+        view.addSubview(nametextField)
+        view.addSubview(paswordtextField)
         view.addSubview(loginButton)
-        view.addSubview(signupLabel)
         
-        stackView.addArrangedSubview(nametextField)
-        stackView.addArrangedSubview(paswordtextField)
-        
-        stackView.translatesAutoresizingMaskIntoConstraints = false
+        nametextField.translatesAutoresizingMaskIntoConstraints = false
+        paswordtextField.translatesAutoresizingMaskIntoConstraints = false
         loginButton.translatesAutoresizingMaskIntoConstraints = false
-        signupLabel.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
-            scrollView.topAnchor.constraint(equalTo: view.topAnchor, constant: 55),
-            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 25),
-            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor , constant: -25),
-            scrollView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -45),
-            
-            stackView.topAnchor.constraint(equalTo: scrollView.topAnchor, constant: 20),
-            stackView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
-            stackView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
-            stackView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
-            
+            nametextField.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 50),
+            nametextField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            nametextField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
             nametextField.heightAnchor.constraint(equalToConstant: 50),
+            
+            paswordtextField.topAnchor.constraint(equalTo: nametextField.bottomAnchor, constant: 20),
+            paswordtextField.leadingAnchor.constraint(equalTo: nametextField.leadingAnchor),
+            paswordtextField.trailingAnchor.constraint(equalTo: nametextField.trailingAnchor),
             paswordtextField.heightAnchor.constraint(equalToConstant: 50),
             
-            loginButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -35),
-            loginButton.leadingAnchor.constraint(equalTo: stackView.leadingAnchor),
-            loginButton.trailingAnchor.constraint(equalTo: stackView.trailingAnchor),
+            loginButton.topAnchor.constraint(equalTo: paswordtextField.bottomAnchor, constant: 20),
+            loginButton.leadingAnchor.constraint(equalTo: nametextField.leadingAnchor),
+            loginButton.trailingAnchor.constraint(equalTo: nametextField.trailingAnchor),
             loginButton.heightAnchor.constraint(equalToConstant: 50),
-            
-            signupLabel.topAnchor.constraint(equalTo: loginButton.bottomAnchor, constant: 15),
-            signupLabel.centerXAnchor.constraint(equalTo: loginButton.centerXAnchor),
-            
         ])
     }
     
-    
-    private func setupGesture() {
-        let gesture = UITapGestureRecognizer(target: self, action: #selector(SignGestureAction))
-        signupLabel.addGestureRecognizer(gesture)
+    private func bindViewModel() {
+        viewmodel.loginResult = { [weak self] result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let username):
+                    self?.navigateToMainApp(username: username)
+                case .failure(let error):
+                    self?.showAlert(title: "Error", message: error.localizedDescription)
+                }
+            }
+        }
     }
     
     @objc func loginTapped() {
         guard let username = nametextField.text,
-                let password = paswordtextField.text,
-                !username.isEmpty,
-                !password.isEmpty else {
-              showAlert(title: "Error", message: "Please fill in all fields.")
-              return
-          }
-        do {
-                let realm = try Realm()
-            if realm.objects(User.self).filter("name == %@ AND password == %@", username, password).first != nil {
-               let tabBar = Tabbar()
-                
-                if let profileNav = tabBar.viewControllers?.last as? UINavigationController,
-                   let profileVC = profileNav.viewControllers.first as? ProfileController {
-                    profileVC.username = username
-                }
-                
-                navigationController?.setViewControllers([tabBar], animated: true)
-                } else {
-                    showAlert(title: "Error", message: "Invalid username or password.")
-                }
-            } catch {
-                print("Realm error: \(error.localizedDescription)")
-                showAlert(title: "Error", message: "Something went wrong. Please try again.")
-            }
-        
-    }
-     
-
-    
-    
-    
-    @objc func SignGestureAction() {
-        let vc = SignUpController()
-        vc.callback = { [weak self] name, password in
-            self?.nametextField.text = name
-            self?.paswordtextField.text = "\(password)"
-            print("User registered with name: \(name) and password: \(password)")
+              let passwordText = paswordtextField.text,
+              let password = Int(passwordText) else {
+            showAlert(title: "Error", message: "Please enter valid inputs.")
+            return
         }
-        navigationController?.pushViewController(vc, animated: true)
+        viewmodel.login(username: username, password: password)
     }
     
-}
-
-extension LoginController: UITextFieldDelegate {
-}
+    private func navigateToMainApp(username: String) {
+        let tabBar = Tabbar()
+        if let profileNav = tabBar.viewControllers?.last as? UINavigationController,
+           let profileVC = profileNav.viewControllers.first as? ProfileController {
+            profileVC.nameLabel.text = username
+        }
+        navigationController?.setViewControllers([tabBar], animated: true)
+    }
+    
+    }
 

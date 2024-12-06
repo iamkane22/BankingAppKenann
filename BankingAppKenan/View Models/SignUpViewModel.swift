@@ -6,7 +6,7 @@
 //
 import Foundation
 import RealmSwift
-///
+
 final class SignUpViewModel {
     private var userlist: Results<User>?
     

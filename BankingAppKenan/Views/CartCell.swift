@@ -82,8 +82,8 @@ class CartCell: UICollectionViewCell {
         ])
     }
     
-    func configure(model: HomeViewModel.CardModel) {
-        cardNumberLabel.text = model.cardNumberFormatted
+    func configure(model: HomeViewModel.CardModell) {
+        cardNumberLabel.text = model.cardNumber
         expirationDateLabel.text = "Exp: \(model.cardExpirationDate)"
         balanceLabel.text = model.cartBalanceFormatted
         logoImageView.image = UIImage(named: model.cartlogoimagename)

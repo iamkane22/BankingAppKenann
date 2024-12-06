@@ -7,6 +7,7 @@
 
 import UIKit
 import RealmSwift
+
 class StartController: UIViewController {
     
     let HelloLabel: UILabel = {
@@ -28,7 +29,6 @@ class StartController: UIViewController {
     
     private func setupUI() {
         view.addSubview(HelloLabel)
-        //tap.delegate = self
         
         HelloLabel.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
@@ -42,6 +42,6 @@ class StartController: UIViewController {
     
     
     @objc func handleTap(_ sender: UITapGestureRecognizer? = nil) {
-        navigationController?.pushViewController(LoginController(), animated: true)
+        navigationController?.pushViewController(LoginController(viewmodel: LoginViewModel()), animated: true)
     }
 }

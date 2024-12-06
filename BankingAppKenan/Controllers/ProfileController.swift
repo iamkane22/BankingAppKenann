@@ -1,15 +1,8 @@
-//
-//  ProfileController.swift
-//  BankingAppKenan
-//
-//  Created by Kenan on 21.11.24.
-//
-
 import UIKit
 
 class ProfileController: UIViewController {
 
-    var username: String?
+    var viewModel: ProfileViewModel? 
     
     lazy var logoutbutton: UIButton = {
         let button = UIButton()
@@ -31,7 +24,6 @@ class ProfileController: UIViewController {
     
     let nameLabel: UILabel = {
         let label = UILabel()
-        label.text = "Your Name"
         label.textColor = .white
         label.font = .boldSystemFont(ofSize: .init(30))
         return label
@@ -46,12 +38,18 @@ class ProfileController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = .white
         constraints()
+        updateUI()
     }
     
     @objc func logout() {
-        let login = LoginController()
-        navigationController?.popToViewController(login, animated: true)
+        // Kullanıcı çıkışı simüle ediyoruz.
+        navigationController?.popToRootViewController(animated: true)
+    }
+    
+    private func updateUI() {
+        nameLabel.text = viewModel?.getDisplayName() ?? "Your Name"
     }
 
     private func constraints() {
@@ -64,14 +62,12 @@ class ProfileController: UIViewController {
         profilelabel.translatesAutoresizingMaskIntoConstraints = false
         nameLabel.translatesAutoresizingMaskIntoConstraints = false
         logoutbutton.translatesAutoresizingMaskIntoConstraints = false
-        
-        nameLabel.text = username ?? "Your Name"
 
         NSLayoutConstraint.activate([
             profilelabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 100),
             profilelabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 8),
             nameLabel.topAnchor.constraint(equalTo: profilelabel.topAnchor),
-            nameLabel.leadingAnchor.constraint(equalTo:profilelabel.trailingAnchor, constant: 16),
+            nameLabel.leadingAnchor.constraint(equalTo: profilelabel.trailingAnchor, constant: 16),
             profileImage.topAnchor.constraint(equalTo: view.topAnchor),
             profileImage.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             profileImage.trailingAnchor.constraint(equalTo: view.trailingAnchor),
@@ -80,7 +76,7 @@ class ProfileController: UIViewController {
             logoutbutton.heightAnchor.constraint(equalToConstant: 34),
             logoutbutton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
             logoutbutton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
-            ])
-        
+        ])
     }
 }
+

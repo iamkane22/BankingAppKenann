@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		6E685C442CF2921E007F8922 /* RealmSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 6E685C432CF2921E007F8922 /* RealmSwift */; };
+		6EEA24D22CFFC8C200D27793 /* DGChartsDynamic in Frameworks */ = {isa = PBXBuildFile; productRef = 6EEA24D12CFFC8C200D27793 /* DGChartsDynamic */; };
+		6EEA24D72CFFCEEC00D27793 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = 6EEA24D62CFFCEEC00D27793 /* Lottie */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -40,7 +42,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6EEA24D22CFFC8C200D27793 /* DGChartsDynamic in Frameworks */,
 				6E685C442CF2921E007F8922 /* RealmSwift in Frameworks */,
+				6EEA24D72CFFCEEC00D27793 /* Lottie in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -84,6 +88,8 @@
 			name = BankingAppKenan;
 			packageProductDependencies = (
 				6E685C432CF2921E007F8922 /* RealmSwift */,
+				6EEA24D12CFFC8C200D27793 /* DGChartsDynamic */,
+				6EEA24D62CFFCEEC00D27793 /* Lottie */,
 			);
 			productName = BankingAppKenan;
 			productReference = 6EB2A0242CE8315B00D73159 /* BankingAppKenan.app */;
@@ -115,6 +121,8 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				6E685C422CF2921E007F8922 /* XCRemoteSwiftPackageReference "realm-swift" */,
+				6EEA24CE2CFFC8C200D27793 /* XCRemoteSwiftPackageReference "Charts" */,
+				6EEA24D52CFFCEEC00D27793 /* XCRemoteSwiftPackageReference "lottie-ios" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 6EB2A0252CE8315B00D73159 /* Products */;
@@ -352,6 +360,22 @@
 				kind = branch;
 			};
 		};
+		6EEA24CE2CFFC8C200D27793 /* XCRemoteSwiftPackageReference "Charts" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/danielgindi/Charts";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.1.0;
+			};
+		};
+		6EEA24D52CFFCEEC00D27793 /* XCRemoteSwiftPackageReference "lottie-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/airbnb/lottie-ios";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 4.5.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -359,6 +383,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 6E685C422CF2921E007F8922 /* XCRemoteSwiftPackageReference "realm-swift" */;
 			productName = RealmSwift;
+		};
+		6EEA24D12CFFC8C200D27793 /* DGChartsDynamic */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6EEA24CE2CFFC8C200D27793 /* XCRemoteSwiftPackageReference "Charts" */;
+			productName = DGChartsDynamic;
+		};
+		6EEA24D62CFFCEEC00D27793 /* Lottie */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6EEA24D52CFFCEEC00D27793 /* XCRemoteSwiftPackageReference "lottie-ios" */;
+			productName = Lottie;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
