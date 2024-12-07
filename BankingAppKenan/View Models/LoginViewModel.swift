@@ -5,8 +5,8 @@ class LoginViewModel {
 
     var loginResult: ((Result<String, Error>) -> Void)?
     
-    func login(username: String, password: Int) {
-        guard !username.isEmpty, password != 0 else {
+    func login(username: String, password: String) {
+        guard !username.isEmpty else {
             loginResult?(.failure(LoginError.emptyFields))
             return
         }

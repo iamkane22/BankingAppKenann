@@ -1,6 +1,5 @@
 import UIKit
 
-
 class LoginController: UIViewController {
     
     var viewmodel: LoginViewModel
@@ -29,21 +28,31 @@ class LoginController: UIViewController {
         let textField = UITextField()
         textField.placeholder = "Password"
         textField.borderStyle = .roundedRect
+        textField.keyboardType = .numberPad
         return textField
     }()
     
+    lazy var signUpButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle("Don't have an account? Sign Up", for: .normal)
+        button.setTitleColor(.blue, for: .normal)
+        button.addTarget(self, action: #selector(signUpTapped), for: .touchUpInside)
+        return button
+    }()
+
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
         setupLoginUI()
-        bindViewModel()
+        bindViewModel() 
     }
     
     private func setupLoginUI() {
         view.addSubview(nametextField)
         view.addSubview(paswordtextField)
         view.addSubview(loginButton)
-        
+        view.addSubview(signUpButton)
+        signUpButton.translatesAutoresizingMaskIntoConstraints = false
         nametextField.translatesAutoresizingMaskIntoConstraints = false
         paswordtextField.translatesAutoresizingMaskIntoConstraints = false
         loginButton.translatesAutoresizingMaskIntoConstraints = false
@@ -63,6 +72,9 @@ class LoginController: UIViewController {
             loginButton.leadingAnchor.constraint(equalTo: nametextField.leadingAnchor),
             loginButton.trailingAnchor.constraint(equalTo: nametextField.trailingAnchor),
             loginButton.heightAnchor.constraint(equalToConstant: 50),
+         
+            signUpButton.topAnchor.constraint(equalTo: loginButton.bottomAnchor, constant: 20),
+            signUpButton.centerXAnchor.constraint(equalTo: view.centerXAnchor)
         ])
     }
     
@@ -70,33 +82,38 @@ class LoginController: UIViewController {
         viewmodel.loginResult = { [weak self] result in
             DispatchQueue.main.async {
                 switch result {
-                case .success(let username):
-                    self?.navigateToMainApp(username: username)
+                case .success:
+                    self?.navigateToTabbar()
                 case .failure(let error):
-                    self?.showAlert(title: "Error", message: error.localizedDescription)
+                    self?.showAlert(title: "Login Failed", message: error.localizedDescription)
                 }
             }
         }
     }
+
+    @objc private func signUpTapped() {
+        let signUpVC = SignUpController()
+        signUpVC.callback = { [weak self] username, password in
+            self?.nametextField.text = username
+            self?.paswordtextField.text = "\(password)"
+        }
+        navigationController?.pushViewController(signUpVC, animated: true)
+    }
     
     @objc func loginTapped() {
         guard let username = nametextField.text,
-              let passwordText = paswordtextField.text,
-              let password = Int(passwordText) else {
+              let passwordText = paswordtextField.text else {
             showAlert(title: "Error", message: "Please enter valid inputs.")
             return
         }
-        viewmodel.login(username: username, password: password)
+
+        viewmodel.login(username: username, password: passwordText)
     }
-    
-    private func navigateToMainApp(username: String) {
-        let tabBar = Tabbar()
-        if let profileNav = tabBar.viewControllers?.last as? UINavigationController,
-           let profileVC = profileNav.viewControllers.first as? ProfileController {
-            profileVC.nameLabel.text = username
-        }
-        navigationController?.setViewControllers([tabBar], animated: true)
+
+    private func navigateToTabbar() {
+        let tabbarVC = Tabbar()
+        navigationController?.pushViewController(tabbarVC, animated: true)
     }
-    
-    }
+
+}
 

@@ -2,41 +2,7 @@ import Foundation
 import RealmSwift
 
 
-enum CardType: String {
-    case visa = "Visa"
-    case paypal = "PayPal"
-}
 class HomeViewModel {
-    
-    class CardModell {
-        let cardNumber: String
-        let cardExpirationDate: String
-        let cardCVC: String
-        var cartBalancee: Double
-        let cartlogoimagename: String
-        let cartType: CardType
-        let cart16number: String
-        let cartback: String
-        
-        init(cardNumber: String, cardExpirationDate: String, cardCVC: String, cartBalancee: Double, cartlogoimagename: String , cartback: String, cart16number: String, cartType: CardType) {
-            self.cardNumber = cardNumber
-            self.cardExpirationDate = cardExpirationDate
-            self.cardCVC = cardCVC
-            self.cartBalancee = cartBalancee
-            self.cartlogoimagename = cartlogoimagename
-            self.cartType = cartType
-            self.cart16number = cart16number
-            self.cartback = cartback
-        }
-    
-        var cardNumberFormatted: String {
-            return "**** \(cardNumber.suffix(4))"
-        }
-        
-        var cartBalanceFormatted: String {
-            return String(format: "₼ %.2f", cartBalancee)
-        }
-    }
     
     var cards: [CardModell] = []
     private let realm = try! Realm()
@@ -48,11 +14,10 @@ class HomeViewModel {
                 cardNumber: card.cardNumber,
                 cardExpirationDate: card.cardExpirationDate,
                 cardCVC: card.cardCVC,
-                cartBalancee: card.cardBalance,
-                cartlogoimagename: "",
-                cartback: "",
-                cart16number: "",
-                cartType: .visa
+                cartBalance: card.cardBalance,
+                cartLogoImageName: "",
+                cart16Number: "",
+                cartBack: ""
             )
         }
     }
@@ -62,11 +27,10 @@ class HomeViewModel {
             cardNumber: String(Int.random(in: 10000000...99999999)),
             cardExpirationDate: "\(Int.random(in: 1...12))/\(Int.random(in: 23...30))",
             cardCVC: String(Int.random(in: 100...999)),
-            cartBalancee: Double.random(in: 0.1...10000),
-            cartlogoimagename: "",
-            cartback: "",
-            cart16number: String(Int.random(in: 0...999999999999999)),
-            cartType: Bool.random() ? .visa : .paypal
+            cartBalance: Double.random(in: 0.1...10000),
+            cartLogoImageName: "",
+            cart16Number: "",
+            cartBack: String(Int.random(in: 0...999999999999999))
         )
         cards.append(randomCard)
         
@@ -74,7 +38,7 @@ class HomeViewModel {
         newCard.cardNumber = randomCard.cardNumber
         newCard.cardExpirationDate = randomCard.cardExpirationDate
         newCard.cardCVC = randomCard.cardCVC
-        newCard.cardBalance = randomCard.cartBalancee
+        newCard.cardBalance = randomCard.cartBalance
         
         try! realm.write {
             realm.add(newCard)

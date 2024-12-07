@@ -4,7 +4,7 @@ import RealmSwift
 class HomeController: UIViewController {
 
     private let viewModel = HomeViewModel()
-    private var cards: [HomeViewModel.CardModell] = []
+    private var cards: [CardModell] = []
 
     private lazy var collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
